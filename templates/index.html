@@ -1,0 +1,40 @@
+<html>
+   <head>
+      <title>Fuel Receipt Detection</title>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+   </head>
+   <body>
+      <p>
+      <h1 align="center">Fuel Receipt Detection</h1>
+      </p>
+      <div class="container">
+         <div class="row">
+            <h2>Input</h2>
+            <form method="post" action="/" enctype="multipart/form-data">
+               <dl>
+                  <p>
+                     <input type="file" name="file" class="form-control" autocomplete="off" required>
+                  </p>
+               </dl>
+               <p>
+                  <input type="submit" value="Submit" class="btn btn-info">
+               </p>
+            </form>
+
+            {% if output %}
+            <h2>Output</h2>
+            <div>
+               <p>{{ output }}</p>
+            </div>
+            {% endif %}
+
+            {% if filename %}
+            <div>
+               <img src="{{ url_for('display_image', filename=filename) }}">
+            </div>
+            {% endif %}
+         </div>
+      </div>
+   </body>
+</html>
