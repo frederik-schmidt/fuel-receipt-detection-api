@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import re
 import shutil
@@ -35,7 +36,8 @@ def detect_text(image_path: str) -> list:
         return response_text
 
     else:
-        client = vision.ImageAnnotatorClient()
+        api_secret = json.loads(API_SECRET)
+        client = vision.ImageAnnotatorClient.from_service_account_info(info=api_secret)
 
         with io.open(image_path, "rb") as image_file:
             content = image_file.read()
@@ -290,6 +292,5 @@ def scan_receipt_main(img_path: str, display_img: bool = False) -> tuple:
 
 
 if __name__ == '__main__':
-    # Example Terminal command: python scan_receipt.py path/to/images/image.jpg
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = API_SECRET
+    # Terminal command: python scan_receipt.py path/to/images/image.jpg
     print(scan_receipt_main(img_path=sys.argv[1], display_img=False)[0])

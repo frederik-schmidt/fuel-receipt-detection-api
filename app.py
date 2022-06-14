@@ -6,7 +6,7 @@ from flask import Flask, request, redirect, url_for, render_template, make_respo
 from werkzeug.security import check_password_hash as check_hash
 
 from scan_receipt import scan_receipt_main
-from settings import ALLOWED_EXTENSIONS, API_SECRET, USER_HASH, PASS_HASH, UPLOAD_FOLDER
+from settings import ALLOWED_EXTENSIONS, USER_HASH, PASS_HASH, UPLOAD_FOLDER
 from utils import allowed_file, format_image_path
 
 app = Flask(__name__)
@@ -14,7 +14,6 @@ app = Flask(__name__)
 app.secret_key = "secret key"
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = API_SECRET
 
 
 def auth_required(func: Callable) -> Callable:
