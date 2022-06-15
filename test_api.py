@@ -1,6 +1,6 @@
 import requests
 
-url = "http://fuel-receipt-detection.herokuapp.com/api/v1/scan"
+url = "https://fuel-receipt-detection.herokuapp.com/api/v1/scan"
 img_path = "path/to/images/image.jpg"
 
 username = None  # add username here
