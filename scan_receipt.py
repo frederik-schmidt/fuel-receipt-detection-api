@@ -36,8 +36,7 @@ def detect_text(image_path: str) -> list:
         return response_text
 
     else:
-        api_secret = json.loads(API_SECRET)
-        client = vision.ImageAnnotatorClient.from_service_account_info(info=api_secret)
+        client = vision.ImageAnnotatorClient.from_service_account_info(info=API_SECRET)
 
         with io.open(image_path, "rb") as image_file:
             content = image_file.read()
