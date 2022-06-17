@@ -71,10 +71,10 @@ Code: `200`
   "amount": 27.95,
   "date": "2022-01-01",
   "fuel_type": "super",
-  "price_incl_tax": 50.00,
+  "price_incl_tax": 50.0,
   "price_per_unit": 1.789,
   "tax_rate": 0.19,
-  "time":"9:41"
+  "time": "9:41"
 }
 ```
 
