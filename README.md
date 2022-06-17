@@ -82,7 +82,10 @@ Code: `200`
 
 | Error code | Response | Description |
 | --- | --- | --- |
-| 401 | Unauthorized Access | The username and/or password are invalid.
+| 400 | Bad Request | Request could not be processed for any reason
+| 401 | Unauthorized Access | Missing or invalid authentication credentials
+| 415 | Unsupported Media Type | Supported media types are "png", "jpg", "jpeg", "gif", "tiff"
+| 422 | Unprocessable Entity | Request must contain a file
 
 ## Web Interface
 
