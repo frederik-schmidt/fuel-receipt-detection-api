@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Union
 
 from werkzeug.utils import secure_filename
 
@@ -9,6 +10,18 @@ from settings import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
 def allowed_file(filepath: str) -> bool:
     """Returns True if the file name provided is valid and has an allowed extension."""
     return "." in filepath and filepath.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def convert_response_code_to_text(code) -> Union[str, None]:
+    """Converts the response code of an HTTP request to an appropriate description."""
+    allowed_extensions = ", ".join(ALLOWED_EXTENSIONS)
+    mapping = {
+        400: "Bad Request",
+        401: "Unauthorized Access",
+        415: "Unsupported Media Type - Supported media types are " + allowed_extensions,
+        422: "Unprocessable Entity - Request must contain a file"
+    }
+    return mapping.get(code, None)
 
 
 def read_from_json(filepath: str) -> list:
