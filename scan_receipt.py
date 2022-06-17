@@ -9,7 +9,7 @@ import dateutil
 import matplotlib
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image, ImageOps
 from google.cloud import vision
 from google.cloud.vision_v1 import types
 from google.protobuf.json_format import MessageToDict
@@ -217,6 +217,7 @@ def save_scanned_image(
     Coordinates must be a dict with tuples (x_1, x_2, y_1, y_2) as values."""
     # Prepare image
     img = Image.open(img_path)
+    img = ImageOps.exif_transpose(img)
     fig, ax = plt.subplots(figsize=(12, 18))
     ax.imshow(img)
     ax.get_xaxis().set_visible(False)
