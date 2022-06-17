@@ -6,7 +6,7 @@ from flask import Flask, request, redirect, url_for, render_template, make_respo
 from werkzeug.security import check_password_hash as check_hash
 
 from scan_receipt import scan_receipt_main
-from settings import ALLOWED_EXTENSIONS, USER_HASH, PASS_HASH, UPLOAD_FOLDER
+from settings import ALLOWED_EXTENSIONS, API_USERNAME_HASH, API_PASSWORD_HASH, UPLOAD_FOLDER
 from utils import allowed_file, format_image_path
 
 app = Flask(__name__)
@@ -23,7 +23,9 @@ def auth_required(func: Callable) -> Callable:
     @wraps(func)
     def decorator(*args, **kwargs):
         auth = request.authorization
-        if auth and check_hash(USER_HASH, auth.username) and check_hash(PASS_HASH, auth.password):
+        username_valid = check_hash(API_USERNAME_HASH, auth.username)
+        password_valid = check_hash(API_PASSWORD_HASH, auth.password)
+        if auth and username_valid and password_valid:
             return func(*args, **kwargs)
         else:
             return make_response(
@@ -54,7 +56,8 @@ def request_image_scan() -> Union[str, tuple]:
 
 @app.route("/api/v1/scan", methods=["POST"])
 @auth_required
-def request_api() -> dict:
+def request_scan() -> dict:
+    """Handles an HTTP request to the scan endpoint."""
     response = request_image_scan()
     if isinstance(response, tuple):
         scan_result, _ = response
@@ -65,7 +68,8 @@ def request_api() -> dict:
 
 @app.route("/", methods=["GET", "POST"])
 @auth_required
-def index_page():
+def request_index():
+    """Handles an HTTP request to the index page."""
     if request.method == "GET":
         return render_template("index.html")
     elif request.method == "POST":
@@ -85,4 +89,5 @@ def index_page():
 @app.route("/display/<filename>")
 @auth_required
 def display_image(filename):
+    """Displays an image."""
     return redirect(url_for("static", filename="uploads/" + filename), code=301)
