@@ -3,7 +3,7 @@ from functools import wraps
 from typing import Callable, Union
 
 import requests
-from flask import Flask, request, redirect, url_for, render_template, make_response
+from flask import Flask, request, render_template, make_response
 from werkzeug.security import check_password_hash as check_hash
 from werkzeug.wrappers import Response
 
@@ -87,13 +87,6 @@ def render_web_interface():
             return render_template("index.html", output=response_text)
     else:
         return render_template("index.html")
-
-
-@app.route("/display/<filename>")
-@auth_required
-def display_image(filename):
-    """Displays an image."""
-    return redirect(url_for("static", filename="uploads/" + filename), code=301)
 
 
 @app.errorhandler(404)
