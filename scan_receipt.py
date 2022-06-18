@@ -1,15 +1,13 @@
 import io
 import os
 import re
-import shutil
 import sys
-from shutil import SameFileError
 
 import dateutil
 import matplotlib
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
-from PIL import Image, ImageOps
+from PIL import Image, ExifTags
 from google.cloud import vision
 from google.cloud.vision_v1 import types
 from google.protobuf.json_format import MessageToDict
@@ -201,13 +199,31 @@ def extract_feature(text_raw: list, to_extract: str) -> tuple:
     return result, result_raw, coordinates
 
 
-def save_raw_image(img_path: str) -> None:
-    """Saves the raw image to the UPLOAD_FOLDER."""
+def save_raw_image_with_original_orientation(img_path: str) -> str:
+    """
+    Checks whether an image got rotated and fixes the orientation, if necessary.
+    Images taken by mobile devices may be saved as Landscape Left, even if the image
+    was taken in portrait mode. This is unconvenient in the web interface.
+    Source: https://stackoverflow.com/questions/13872331/rotating-an-image-with-orientation-specified-in-exif-using-python-without-pil-in
+    """
+    image = Image.open(img_path)
     try:
-        img_path_new = format_image_path(img_path)
-        shutil.copy(img_path, img_path_new)
-    except SameFileError:
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == "Orientation":
+                break
+        exif = image._getexif()
+        if exif[orientation] == 3:
+            image = image.rotate(180, expand=True)
+        elif exif[orientation] == 6:
+            image = image.rotate(270, expand=True)
+        elif exif[orientation] == 8:
+            image = image.rotate(90, expand=True)
+    except (AttributeError, KeyError, IndexError, TypeError):
         pass
+    img_path_new = format_image_path(img_path)
+    image.save(img_path_new)
+    image.close()
+    return img_path_new
 
 
 def save_scanned_image(
@@ -217,7 +233,6 @@ def save_scanned_image(
     Coordinates must be a dict with tuples (x_1, x_2, y_1, y_2) as values."""
     # Prepare image
     img = Image.open(img_path)
-    img = ImageOps.exif_transpose(img)
     fig, ax = plt.subplots(figsize=(12, 18))
     ax.imshow(img)
     ax.get_xaxis().set_visible(False)
@@ -252,7 +267,7 @@ def scan_receipt_main(img_path: str, display_img: bool = False) -> tuple:
     """Runs the entire process for an image: detect text in image, extract features
     from text, and save scanned image with boxes around features."""
     # Save image to UPLOAD_FOLDER
-    save_raw_image(img_path)
+    img_path = save_raw_image_with_original_orientation(img_path)
 
     # Detect text in image
     text_raw = detect_text(img_path)
