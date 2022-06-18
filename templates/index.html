@@ -31,7 +31,7 @@
 
             {% if filename %}
             <div>
-               <img src="{{ url_for('display_image', filename=filename) }}">
+               <img src="{{ './static/uploads/' + filename }}">
             </div>
             {% endif %}
          </div>
