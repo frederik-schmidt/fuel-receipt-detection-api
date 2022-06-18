@@ -68,13 +68,13 @@ Code: `200`
 
 ```json
 {
-  "amount": 27.95,
   "date": "2022-01-01",
+  "time": "9:41",
   "fuel_type": "super",
-  "price_incl_tax": 50.0,
-  "price_per_unit": 1.789,
   "tax_rate": 0.19,
-  "time": "9:41"
+  "amount": 27.95,
+  "price_per_unit": 1.789,
+  "price_incl_tax": 50.0
 }
 ```
 
@@ -84,6 +84,8 @@ Code: `200`
 | --- | --- | --- |
 | 400 | Bad Request | Request could not be processed for any reason
 | 401 | Unauthorized Access | Missing or invalid authentication credentials
+| 404 | Not Found | URL does not exist
+| 405 | Method Not Allowed | Request method is not allowed for the requested URL
 | 415 | Unsupported Media Type | Supported media types are "png", "jpg", "jpeg", "gif", "tiff"
 | 422 | Unprocessable Entity | Request must contain a file
 

@@ -2,6 +2,7 @@ import json
 import os
 from typing import Union
 
+from flask import jsonify
 from werkzeug.utils import secure_filename
 
 from settings import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
@@ -12,16 +13,25 @@ def allowed_file(filepath: str) -> bool:
     return "." in filepath and filepath.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def convert_response_code_to_text(code) -> Union[str, None]:
+def response_code_to_text(code) -> Union[str, None]:
     """Converts the response code of an HTTP request to an appropriate description."""
-    allowed_extensions = ", ".join(ALLOWED_EXTENSIONS)
     mapping = {
-        400: "Bad Request",
-        401: "Unauthorized Access",
-        415: "Unsupported Media Type - Supported media types are " + allowed_extensions,
-        422: "Unprocessable Entity - Request must contain a file"
+        400: "400 Bad Request",
+        401: "401 Unauthorized Access",
+        404: "404 Not Found",
+        405: "405 Method Not Allowed",
+        415: "415 Unsupported Media Type",
+        422: "422 Unprocessable Entity"
     }
     return mapping.get(code, None)
+
+
+def wrap_into_json(response_text: Union[str, dict]):
+    """Wraps a plain response text into json."""
+    if isinstance(response_text, dict):
+        return jsonify({"success": True, "data": response_text})
+    else:
+        return jsonify({"success": False, "message": response_text})
 
 
 def read_from_json(filepath: str) -> list:
