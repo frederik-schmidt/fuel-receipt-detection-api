@@ -1,4 +1,5 @@
 import os
+import uuid
 from functools import wraps
 from typing import Callable, Union
 
@@ -8,7 +9,14 @@ from werkzeug.security import check_password_hash as check_hash
 from werkzeug.wrappers import Response
 
 from scan_receipt import scan_receipt_main
-from settings import API_USERNAME_HASH, API_PASSWORD_HASH, GCS_BUCKET_NAME, GCS_BUCKET_SUBFOLDER, UPLOAD_FOLDER
+from settings import (
+    API_USERNAME_HASH,
+    API_PASSWORD_HASH,
+    GCS_BUCKET_NAME,
+    GCS_BUCKET_SUBFOLDER,
+    PRODUCTION,
+    UPLOAD_FOLDER
+)
 from utils import allowed_file, format_image_path, response_code_to_text, wrap_into_json, upload_to_gcs
 
 app = Flask(__name__)
@@ -51,30 +59,29 @@ def request_image_scan() -> Union[int, tuple]:
         return 415
     else:
         try:
+            if PRODUCTION:
+                request_id = uuid.uuid1().hex
+                img_path = os.path.join(UPLOAD_FOLDER, request_id + ".jpg")
+            else:
+                img_path = format_image_path(file.filename)
+
             # Save receipt to UPLOAD_FOLDER
-            img_path = format_image_path(file.filename)
             file.save(img_path)
 
             # Scan receipt
-            scan_result, img_path_scanned = scan_receipt_main(img_path=img_path)
+            scan_result = scan_receipt_main(img_path=img_path)
 
-            # Upload scanned receipt to GCS
-            img_name_scanned = os.path.split(img_path_scanned)[1]
-            remote_filename = f"{GCS_BUCKET_SUBFOLDER}/{img_name_scanned}"
+            # Upload scanned receipt to GCS and remove local receipt
+            img_name = os.path.split(img_path)[1]
+            remote_filename = f"{GCS_BUCKET_SUBFOLDER}/{img_name}"
             upload_to_gcs(
                 bucket_name=GCS_BUCKET_NAME,
-                local_filename=img_path_scanned,
+                local_filename=img_path,
                 remote_filename=remote_filename,
             )
             gcs_base_uri = "https://storage.cloud.google.com/"
             gcs_uri = gcs_base_uri + GCS_BUCKET_NAME + "/" + remote_filename
-
-            # Remove temp files
-            for file in [img_path, img_path_scanned]:
-                try:
-                    os.remove(file)
-                except FileNotFoundError:
-                    pass
+            os.remove(img_path)
 
             return 200, scan_result, gcs_uri
         except requests.exceptions.ConnectionError:

@@ -194,7 +194,7 @@ def extract_feature(text_raw: list, to_extract: str) -> tuple:
     return result, result_raw, coordinates
 
 
-def save_raw_image_with_original_orientation(img_path: str) -> str:
+def save_raw_image_with_original_orientation(img_path: str) -> None:
     """
     Checks whether an image got rotated and fixes the orientation, if necessary.
     Images taken by mobile devices may be saved as Landscape Left, even if the image
@@ -215,15 +215,13 @@ def save_raw_image_with_original_orientation(img_path: str) -> str:
             image = image.rotate(90, expand=True)
     except (AttributeError, KeyError, IndexError, TypeError):
         pass
-    img_path_new = format_image_path(img_path)
-    image.save(img_path_new)
+    image.save(img_path)
     image.close()
-    return img_path_new
 
 
 def save_scanned_image(
         img_path: str, coordinates: dict = None, display_img: bool = False
-) -> str:
+) -> None:
     """Displays an image. If coordinates are provided, a red box is drawn around.
     Coordinates must be a dict with tuples (x_1, x_2, y_1, y_2) as values."""
     # Prepare image
@@ -252,17 +250,15 @@ def save_scanned_image(
         plt.show()
 
     # Save processed image
-    img_path_scanned = format_image_path(img_path, option="scanned")
-    plt.savefig(img_path_scanned, bbox_inches="tight")
+    plt.savefig(img_path, bbox_inches="tight")
     plt.close()
-    return img_path_scanned
 
 
-def scan_receipt_main(img_path: str, display_img: bool = False) -> tuple:
+def scan_receipt_main(img_path: str, display_img: bool = False) -> dict:
     """Runs the entire process for an image: detect text in image, extract features
     from text, and save scanned image with boxes around features."""
     # Save image to UPLOAD_FOLDER
-    img_path = save_raw_image_with_original_orientation(img_path)
+    save_raw_image_with_original_orientation(img_path)
 
     # Detect text in image
     text_raw = detect_text(img_path)
@@ -293,8 +289,6 @@ def scan_receipt_main(img_path: str, display_img: bool = False) -> tuple:
             result["price_per_unit"] = round(result["price_incl_tax"] / result["amount"], 3)
 
     # Save scanned image with boxes around features to UPLOAD_FOLDER
-    img_path_scanned = save_scanned_image(
-        img_path=img_path, coordinates=coordinates, display_img=display_img
-    )
+    save_scanned_image(img_path=img_path, coordinates=coordinates, display_img=display_img)
 
-    return result, img_path_scanned
+    return result
