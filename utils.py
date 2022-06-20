@@ -3,9 +3,11 @@ import os
 from typing import Union
 
 from flask import jsonify
+from google.cloud import storage
+from google.oauth2 import service_account
 from werkzeug.utils import secure_filename
 
-from settings import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
+from settings import ALLOWED_EXTENSIONS, API_SECRET, GCP_PROJECT_ID, UPLOAD_FOLDER
 
 
 def allowed_file(filepath: str) -> bool:
@@ -73,3 +75,12 @@ def format_image_path(img_path, option=None):
         pass
 
     return os.path.join(UPLOAD_FOLDER, filename)
+
+
+def upload_to_gcs(bucket_name: str, local_filename: str, remote_filename: str) -> None:
+    """Uploads a file to a Google Cloud Storage bucket."""
+    credentials = service_account.Credentials.from_service_account_info(API_SECRET)
+    client = storage.Client(project=GCP_PROJECT_ID, credentials=credentials)
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(remote_filename)
+    blob.upload_from_filename(local_filename)
