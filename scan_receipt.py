@@ -144,13 +144,6 @@ def extract_feature(text_raw: list, to_extract: str) -> tuple:
         text_after_amount = text.split(str(amount_raw))[1]
         matches = re.compile(f"({'|'.join(pattern)})").findall(text_after_amount)
 
-    elif to_extract == "amount":
-        # We want to find the first matching amount after the fuel type, because this
-        # is most likely the amount of fuel
-        _, fuel_type_raw, _ = extract_feature(text_raw, "fuel_type")
-        text_after_fuel_type = text.split(str(fuel_type_raw))[1]
-        matches = re.findall(pattern, text_after_fuel_type)
-
     else:
         if isinstance(pattern, list):
             matches = re.compile(f"({'|'.join(pattern)})").findall(text)
@@ -205,7 +198,7 @@ def save_raw_image_with_original_orientation(img_path: str) -> str:
     """
     Checks whether an image got rotated and fixes the orientation, if necessary.
     Images taken by mobile devices may be saved as Landscape Left, even if the image
-    was taken in portrait mode. This is unconvenient in the web interface.
+    was taken in portrait mode. This is inconvenient in the web interface.
     Source: https://stackoverflow.com/questions/13872331/rotating-an-image-with-orientation-specified-in-exif-using-python-without-pil-in
     """
     image = Image.open(img_path)
