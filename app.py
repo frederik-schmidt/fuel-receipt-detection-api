@@ -116,7 +116,7 @@ def url_not_found(e):
     response_code = 404
     response_text = response_code_to_text(response_code)
     response_text = wrap_into_json(response_text)
-    return response_text
+    return make_response(response_text, response_code)
 
 
 @app.errorhandler(405)
@@ -125,7 +125,7 @@ def url_not_found(e):
     response_code = 405
     response_text = response_code_to_text(response_code)
     response_text = wrap_into_json(response_text)
-    return response_text
+    return make_response(response_text, response_code)
 
 
 @app.errorhandler(500)
@@ -134,4 +134,4 @@ def internal_server_error(e):
     response_code = 400
     response_text = response_code_to_text(response_code)
     response_text = wrap_into_json(response_text)
-    return response_text
+    return make_response(response_text, response_code)

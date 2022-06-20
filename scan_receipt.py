@@ -305,8 +305,3 @@ def scan_receipt_main(img_path: str, display_img: bool = False) -> tuple:
     )
 
     return result, img_path_scanned
-
-
-if __name__ == '__main__':
-    # Terminal command: python scan_receipt.py path/to/images/image.jpg
-    print(scan_receipt_main(img_path=sys.argv[1], display_img=False)[0])
