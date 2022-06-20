@@ -1,7 +1,6 @@
 import io
 import os
 import re
-import sys
 
 import dateutil
 import matplotlib
@@ -12,7 +11,7 @@ from google.cloud import vision
 from google.cloud.vision_v1 import types
 from google.protobuf.json_format import MessageToDict
 
-from settings import ALLOWED_EXTENSIONS, API_SECRET
+from settings import ALLOWED_EXTENSIONS, API_SECRET, PRODUCTION
 from utils import allowed_file, read_from_json, write_to_json, format_image_path
 
 matplotlib.use("Agg")
@@ -28,7 +27,7 @@ def detect_text(image_path: str) -> list:
 
     json_path = format_image_path(image_path, option="json")
 
-    if os.path.isfile(json_path):
+    if os.path.isfile(json_path) and not PRODUCTION:
         response_text = read_from_json(json_path)
         return response_text
 
@@ -39,16 +38,12 @@ def detect_text(image_path: str) -> list:
             content = image_file.read()
         image = types.Image(content=content)
         response = client.text_detection(image=image)
-
-        if response.error.message:
-            raise Exception(
-                f"{response.error.message}\nFor more info on error messages, check: "
-                "https://cloud.google.com/apis/design/errors"
-            )
-
         response_dict = MessageToDict(response._pb)
         response_text = response_dict["textAnnotations"]
-        write_to_json(json_path, response_text)
+
+        if not PRODUCTION:
+            write_to_json(json_path, response_text)
+
         return response_text
 
 
@@ -143,11 +138,18 @@ def extract_feature(text_raw: list, to_extract: str) -> tuple:
 
     # Find all strings in text that match the pattern
     if to_extract == "price_incl_tax":
-        # When it comes to the price, we want to find the first price after the fuel
-        # amount, because this is most likely the amount paid for the fuel amount
+        # We want to find the first matching price after the fuel amount, because this
+        # is most likely the amount paid for the fuel amount
         _, amount_raw, _ = extract_feature(text_raw, "amount")
         text_after_amount = text.split(str(amount_raw))[1]
         matches = re.compile(f"({'|'.join(pattern)})").findall(text_after_amount)
+
+    elif to_extract == "amount":
+        # We want to find the first matching amount after the fuel type, because this
+        # is most likely the amount of fuel
+        _, fuel_type_raw, _ = extract_feature(text_raw, "fuel_type")
+        text_after_fuel_type = text.split(str(fuel_type_raw))[1]
+        matches = re.findall(pattern, text_after_fuel_type)
 
     else:
         if isinstance(pattern, list):
@@ -303,8 +305,3 @@ def scan_receipt_main(img_path: str, display_img: bool = False) -> tuple:
     )
 
     return result, img_path_scanned
-
-
-if __name__ == '__main__':
-    # Terminal command: python scan_receipt.py path/to/images/image.jpg
-    print(scan_receipt_main(img_path=sys.argv[1], display_img=False)[0])

@@ -29,9 +29,9 @@
             </div>
             {% endif %}
 
-            {% if filename %}
+            {% if gcs_uri %}
             <div>
-               <img src="{{ './static/uploads/' + filename }}">
+               <img src="{{ gcs_uri }}">
             </div>
             {% endif %}
          </div>

@@ -8,8 +8,8 @@ from werkzeug.security import check_password_hash as check_hash
 from werkzeug.wrappers import Response
 
 from scan_receipt import scan_receipt_main
-from settings import API_USERNAME_HASH, API_PASSWORD_HASH, UPLOAD_FOLDER
-from utils import allowed_file, format_image_path, response_code_to_text, wrap_into_json
+from settings import API_USERNAME_HASH, API_PASSWORD_HASH, GCS_BUCKET_NAME, GCS_BUCKET_SUBFOLDER, UPLOAD_FOLDER
+from utils import allowed_file, format_image_path, response_code_to_text, wrap_into_json, upload_to_gcs
 
 app = Flask(__name__)
 
@@ -51,10 +51,32 @@ def request_image_scan() -> Union[int, tuple]:
         return 415
     else:
         try:
+            # Save receipt to UPLOAD_FOLDER
             img_path = format_image_path(file.filename)
-            file.save(img_path)  # Save image to UPLOAD_FOLDER
-            scan_result, filepath_scanned = scan_receipt_main(img_path=img_path)
-            return 200, scan_result, filepath_scanned
+            file.save(img_path)
+
+            # Scan receipt
+            scan_result, img_path_scanned = scan_receipt_main(img_path=img_path)
+
+            # Upload scanned receipt to GCS
+            img_name_scanned = os.path.split(img_path_scanned)[1]
+            remote_filename = f"{GCS_BUCKET_SUBFOLDER}/{img_name_scanned}"
+            upload_to_gcs(
+                bucket_name=GCS_BUCKET_NAME,
+                local_filename=img_path_scanned,
+                remote_filename=remote_filename,
+            )
+            gcs_base_uri = "https://storage.cloud.google.com/"
+            gcs_uri = gcs_base_uri + GCS_BUCKET_NAME + "/" + remote_filename
+
+            # Remove temp files
+            for file in [img_path, img_path_scanned]:
+                try:
+                    os.remove(file)
+                except FileNotFoundError:
+                    pass
+
+            return 200, scan_result, gcs_uri
         except requests.exceptions.ConnectionError:
             return 400
 
@@ -79,9 +101,8 @@ def render_web_interface():
     if request.method == "POST":
         response = request_image_scan()
         if isinstance(response, tuple):
-            response_text, filepath_scanned = response[1], response[2]
-            filename = os.path.split(filepath_scanned)[1]
-            return render_template("index.html", output=response_text, filename=filename)
+            response_text, gcs_uri = response[1], response[2]
+            return render_template("index.html", output=response_text, gcs_uri=gcs_uri)
         else:
             response_text = response_code_to_text(response)
             return render_template("index.html", output=response_text)
@@ -95,7 +116,7 @@ def url_not_found(e):
     response_code = 404
     response_text = response_code_to_text(response_code)
     response_text = wrap_into_json(response_text)
-    return response_text
+    return make_response(response_text, response_code)
 
 
 @app.errorhandler(405)
@@ -104,7 +125,7 @@ def url_not_found(e):
     response_code = 405
     response_text = response_code_to_text(response_code)
     response_text = wrap_into_json(response_text)
-    return response_text
+    return make_response(response_text, response_code)
 
 
 @app.errorhandler(500)
@@ -113,4 +134,4 @@ def internal_server_error(e):
     response_code = 400
     response_text = response_code_to_text(response_code)
     response_text = wrap_into_json(response_text)
-    return response_text
+    return make_response(response_text, response_code)
