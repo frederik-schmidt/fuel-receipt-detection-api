@@ -20,3 +20,4 @@ API_SECRET = {i: v.replace("\\n", "\n") for i, v in API_SECRET.items()}
 GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 GCS_BUCKET_NAME = os.environ.get("GCS_BUCKET_NAME")
 GCS_BUCKET_SUBFOLDER = os.environ.get("GCS_BUCKET_SUBFOLDER")
+BQ_TABLE_ID = os.environ.get("BQ_TABLE_ID")

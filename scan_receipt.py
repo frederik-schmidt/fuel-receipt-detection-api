@@ -264,7 +264,8 @@ def scan_receipt_main(img_path: str, display_img: bool = False) -> dict:
     text_raw = detect_text(img_path)
 
     # Extract features from text
-    result, coordinates = {}, {}
+    img_name = os.path.split(img_path)[1].split(".")[0]
+    result, coordinates = {"id": img_name}, {}
     for feat in [
         "date",
         "time",

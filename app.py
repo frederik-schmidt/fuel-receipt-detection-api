@@ -15,9 +15,16 @@ from settings import (
     GCS_BUCKET_NAME,
     GCS_BUCKET_SUBFOLDER,
     PRODUCTION,
-    UPLOAD_FOLDER
+    UPLOAD_FOLDER,
 )
-from utils import allowed_file, format_image_path, response_code_to_text, wrap_into_json, upload_to_gcs
+from utils import (
+    allowed_file,
+    format_image_path,
+    response_code_to_text,
+    wrap_into_json,
+    load_file_into_gcs,
+    load_json_into_bq,
+)
 
 app = Flask(__name__)
 
@@ -64,24 +71,22 @@ def request_image_scan() -> Union[int, tuple]:
                 img_path = os.path.join(UPLOAD_FOLDER, request_id + ".jpg")
             else:
                 img_path = format_image_path(file.filename)
+            file.save(img_path)  # Save receipt locally to UPLOAD_FOLDER
 
-            # Save receipt to UPLOAD_FOLDER
-            file.save(img_path)
+            scan_result = scan_receipt_main(img_path=img_path)  # Scan receipt
+            load_json_into_bq(scan_result)  # Load scan result into BQ
 
-            # Scan receipt
-            scan_result = scan_receipt_main(img_path=img_path)
-
-            # Upload scanned receipt to GCS and remove local receipt
             img_name = os.path.split(img_path)[1]
             remote_filename = f"{GCS_BUCKET_SUBFOLDER}/{img_name}"
-            upload_to_gcs(
+            load_file_into_gcs(  # Load scanned receipt into GCS
                 bucket_name=GCS_BUCKET_NAME,
                 local_filename=img_path,
                 remote_filename=remote_filename,
             )
             gcs_base_uri = "https://storage.cloud.google.com/"
             gcs_uri = gcs_base_uri + GCS_BUCKET_NAME + "/" + remote_filename
-            os.remove(img_path)
+
+            os.remove(img_path)  # Remove local receipt from UPLOAD FOLDER
 
             return 200, scan_result, gcs_uri
         except requests.exceptions.ConnectionError:
