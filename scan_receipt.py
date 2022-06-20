@@ -143,11 +143,18 @@ def extract_feature(text_raw: list, to_extract: str) -> tuple:
 
     # Find all strings in text that match the pattern
     if to_extract == "price_incl_tax":
-        # When it comes to the price, we want to find the first price after the fuel
-        # amount, because this is most likely the amount paid for the fuel amount
+        # We want to find the first matching price after the fuel amount, because this
+        # is most likely the amount paid for the fuel amount
         _, amount_raw, _ = extract_feature(text_raw, "amount")
         text_after_amount = text.split(str(amount_raw))[1]
         matches = re.compile(f"({'|'.join(pattern)})").findall(text_after_amount)
+
+    elif to_extract == "amount":
+        # We want to find the first matching amount after the fuel type, because this
+        # is most likely the amount of fuel
+        _, fuel_type_raw, _ = extract_feature(text_raw, "fuel_type")
+        text_after_fuel_type = text.split(str(fuel_type_raw))[1]
+        matches = re.findall(pattern, text_after_fuel_type)
 
     else:
         if isinstance(pattern, list):
