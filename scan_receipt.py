@@ -1,7 +1,6 @@
 import io
 import os
 import re
-import sys
 
 import dateutil
 import matplotlib
@@ -12,7 +11,7 @@ from google.cloud import vision
 from google.cloud.vision_v1 import types
 from google.protobuf.json_format import MessageToDict
 
-from settings import ALLOWED_EXTENSIONS, API_SECRET
+from settings import ALLOWED_EXTENSIONS, API_SECRET, PRODUCTION
 from utils import allowed_file, read_from_json, write_to_json, format_image_path
 
 matplotlib.use("Agg")
@@ -28,7 +27,7 @@ def detect_text(image_path: str) -> list:
 
     json_path = format_image_path(image_path, option="json")
 
-    if os.path.isfile(json_path):
+    if os.path.isfile(json_path) and not PRODUCTION:
         response_text = read_from_json(json_path)
         return response_text
 
@@ -39,16 +38,12 @@ def detect_text(image_path: str) -> list:
             content = image_file.read()
         image = types.Image(content=content)
         response = client.text_detection(image=image)
-
-        if response.error.message:
-            raise Exception(
-                f"{response.error.message}\nFor more info on error messages, check: "
-                "https://cloud.google.com/apis/design/errors"
-            )
-
         response_dict = MessageToDict(response._pb)
         response_text = response_dict["textAnnotations"]
-        write_to_json(json_path, response_text)
+
+        if not PRODUCTION:
+            write_to_json(json_path, response_text)
+
         return response_text
 
 

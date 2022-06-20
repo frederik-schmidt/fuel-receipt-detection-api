@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+PRODUCTION = os.environ.get("IS_HEROKU", False)
+
 UPLOAD_FOLDER = "./static/uploads/"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "tiff"}
 
