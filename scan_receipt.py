@@ -82,7 +82,7 @@ def get_regex_patterns() -> dict:
         "amount": f"(?:\s|\n){amount}\s{volume}",
         "price_per_unit": [
             f"{unit_amount}\s{currency}\s?{per}\s?{volume}",
-            f"{currency}\s{unit_amount}\s?{per}\s?{volume}"
+            f"{currency}\s{unit_amount}\s?{per}\s?{volume}",
         ],
         "price_incl_tax": [
             f"{amount}\s{currency}(?:\s|\n)",
@@ -98,7 +98,7 @@ def standardize_date(date: str) -> str:
 
 
 def preprocess_float_matches(matches: list) -> list:
-    """Extracts the numbers from a list of strings and converts it into a list of floats.
+    """Extracts numbers from a list of strings and converts it into a list of floats.
      Each string must contain only one float."""
     # Replace dot with comma
     matches_form = [i.replace(",", ".") for i in matches]
@@ -156,7 +156,7 @@ def extract_feature(text_raw: list, to_extract: str) -> tuple:
             matches_form = [standardize_date(date) for date in matches]
             result = sorted(matches_form)[-1]  # Select last date
 
-            # Find the non-formatted string to be able to find its coordinates in text_raw
+            # Find non-formatted string to be able to find its coordinates in text_raw
             max_idx = matches_form.index(max(matches_form))
             result_raw = re.sub("[^0-9.,-/]", "", matches[max_idx])
 
@@ -220,7 +220,7 @@ def save_raw_image_with_original_orientation(img_path: str) -> None:
 
 
 def save_scanned_image(
-        img_path: str, coordinates: dict = None, display_img: bool = False
+    img_path: str, coordinates: dict = None, display_img: bool = False
 ) -> None:
     """Displays an image. If coordinates are provided, a red box is drawn around.
     Coordinates must be a dict with tuples (x_1, x_2, y_1, y_2) as values."""
@@ -266,30 +266,27 @@ def scan_receipt_main(img_path: str, display_img: bool = False) -> dict:
     # Extract features from text
     img_name = os.path.split(img_path)[1].split(".")[0]
     result, coordinates = {"id": img_name}, {}
-    for feat in [
-        "date",
-        "time",
-        "fuel_type",
-        "tax_rate",
-        "amount",
-        "price_per_unit"
-    ]:
+    for feat in ["date", "time", "fuel_type", "tax_rate", "amount", "price_per_unit"]:
         result[feat], _, coordinates[feat] = extract_feature(text_raw, to_extract=feat)
 
     # If a price per unit was found, calculate price incl. tax
     if result["price_per_unit"]:
         if result["amount"]:
-            result["price_incl_tax"] = round(result["price_per_unit"] * result["amount"], 2)
+            price_incl_tax = round(result["price_per_unit"] * result["amount"], 2)
+            result["price_incl_tax"] = price_incl_tax
         else:
             result["price_incl_tax"] = None
-    # If no price per unit was found, extract the price incl. tax and calculate price per unit
+    # If no price per unit was found, extract the price incl. tax and calculate it
     else:
         feat = "price_incl_tax"
         result[feat], _, coordinates[feat] = extract_feature(text_raw, to_extract=feat)
         if result["price_incl_tax"] and result["amount"]:
-            result["price_per_unit"] = round(result["price_incl_tax"] / result["amount"], 3)
+            price_per_unit = round(result["price_incl_tax"] / result["amount"], 3)
+            result["price_per_unit"] = price_per_unit
 
     # Save scanned image with boxes around features to UPLOAD_FOLDER
-    save_scanned_image(img_path=img_path, coordinates=coordinates, display_img=display_img)
+    save_scanned_image(
+        img_path=img_path, coordinates=coordinates, display_img=display_img
+    )
 
     return result
