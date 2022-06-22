@@ -70,13 +70,13 @@ Code: `200`
 {
     "success": true,
     "data": {
-        "id": "87c660a2f16011ec8cc48e49d341ea97",
-        "date": "2022-01-01",
-        "time": "9:41",
+        "id": "eadacceef1f811ec8ebd5a66b67455ed",
+        "date": "2021-12-12",
+        "time": "18:01",
         "fuel_type": "super",
         "tax_rate": 0.19,
-        "amount": 27.95,
-        "price_per_unit": 1.789,
+        "amount": 30.32,
+        "price_per_unit": 1.649,
         "price_incl_tax": 50.0
     }
 }
