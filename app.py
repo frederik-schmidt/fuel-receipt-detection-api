@@ -38,6 +38,7 @@ def auth_required(func: Callable) -> Union[Callable, Response]:
     """Decorator which hashes the provided username and password and compares with the
     actual hashed username and password. If both are present and match, the decorated
     function gets executed, otherwise an error 401 gets returned."""
+
     @wraps(func)
     def decorator(*args, **kwargs):
         auth = request.authorization
@@ -51,6 +52,7 @@ def auth_required(func: Callable) -> Union[Callable, Response]:
         response_text = wrap_into_json(response_text)
         callback = {"WWW-Authenticate": "Basic realm='Login Required'"}
         return make_response(response_text, response_code, callback)
+
     return decorator
 
 
@@ -143,6 +145,15 @@ def url_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     """Creates custom response for requests with internal server error."""
+    response_code = 400
+    response_text = response_code_to_text(response_code)
+    response_text = wrap_into_json(response_text)
+    return make_response(response_text, response_code)
+
+
+@app.errorhandler(503)
+def service_unavailable(e):
+    """Creates custom response for requests with service unavailable."""
     response_code = 400
     response_text = response_code_to_text(response_code)
     response_text = wrap_into_json(response_text)

@@ -68,26 +68,30 @@ Code: `200`
 
 ```json
 {
-  "date": "2022-01-01",
-  "time": "9:41",
-  "fuel_type": "super",
-  "tax_rate": 0.19,
-  "amount": 27.95,
-  "price_per_unit": 1.789,
-  "price_incl_tax": 50.0
+    "success": true,
+    "data": {
+        "id": "eadacceef1f811ec8ebd5a66b67455ed",
+        "date": "2021-12-12",
+        "time": "18:01",
+        "fuel_type": "super",
+        "tax_rate": 0.19,
+        "amount": 30.32,
+        "price_per_unit": 1.649,
+        "price_incl_tax": 50.0
+    }
 }
 ```
 
 ### Possible Errors
 
-| Error code | Response | Description |
-| --- | --- | --- |
-| 400 | Bad Request | Request could not be processed for any reason
-| 401 | Unauthorized Access | Missing or invalid authentication credentials
-| 404 | Not Found | URL does not exist
-| 405 | Method Not Allowed | Request method is not allowed for the requested URL
-| 415 | Unsupported Media Type | Supported media types are "png", "jpg", "jpeg", "gif", "tiff"
-| 422 | Unprocessable Entity | Request must contain a file
+| Error code | Response               | Description                                                   |
+|------------|------------------------|---------------------------------------------------------------|
+| 400        | Bad Request            | Request could not be processed for any reason                 |
+| 401        | Unauthorized Access    | Missing or invalid authentication credentials                 |
+| 404        | Not Found              | URL does not exist                                            |
+| 405        | Method Not Allowed     | Request method is not allowed for the requested URL           |
+| 415        | Unsupported Media Type | Supported media types are "png", "jpg", "jpeg", "gif", "tiff" |
+| 422        | Unprocessable Entity   | Request must contain a file                                   |
 
 ## Web Interface
 

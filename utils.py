@@ -13,7 +13,7 @@ from settings import (
     API_SECRET,
     GCP_PROJECT_ID,
     BQ_TABLE_ID,
-    UPLOAD_FOLDER
+    UPLOAD_FOLDER,
 )
 
 
@@ -30,7 +30,7 @@ def response_code_to_text(code) -> Union[str, None]:
         404: "404 Not Found",
         405: "405 Method Not Allowed",
         415: "415 Unsupported Media Type",
-        422: "422 Unprocessable Entity"
+        422: "422 Unprocessable Entity",
     }
     return mapping.get(code, None)
 
@@ -85,7 +85,7 @@ def format_image_path(img_path, option=None):
 
 
 def load_file_into_gcs(
-        bucket_name: str, local_filename: str, remote_filename: str
+    bucket_name: str, local_filename: str, remote_filename: str
 ) -> None:
     """Uploads a file to a Google Cloud Storage bucket."""
     credentials = service_account.Credentials.from_service_account_info(API_SECRET)
