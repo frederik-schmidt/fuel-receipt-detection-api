@@ -2,6 +2,7 @@ import json
 import os
 from typing import Union
 
+import dateutil
 from flask import jsonify
 from google.cloud import bigquery
 from google.cloud import storage
@@ -11,8 +12,8 @@ from werkzeug.utils import secure_filename
 from settings import (
     ALLOWED_EXTENSIONS,
     API_SECRET,
-    GCP_PROJECT_ID,
     BQ_TABLE_ID,
+    GCP_PROJECT_ID,
     UPLOAD_FOLDER,
 )
 
@@ -20,6 +21,41 @@ from settings import (
 def allowed_file(filepath: str) -> bool:
     """Returns True if the file name provided is valid and has an allowed extension."""
     return "." in filepath and filepath.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def format_image_path(img_path, option=None):
+    """Formats the image file name and changes the path to UPLOAD_FOLDER. Optionally, a
+    json path or an image path with added '_processed' can be returned.
+
+    >>> img_path_t = './data/IMG 1234.jpg'
+    >>> format_image_path(img_path_t)
+    './static/uploads/IMG_1234.jpg'
+    >>> format_image_path(img_path_t, option="json")
+    './static/uploads/IMG_1234.json'
+    >>> format_image_path(img_path_t, option="scanned")
+    './static/uploads/IMG_1234_scanned.jpg'
+    """
+    filename = os.path.split(img_path)[1]
+    filename = secure_filename(filename)
+
+    if option == "json":
+        filename = filename.rsplit(".", 1)[0] + ".json"
+    elif option == "scanned":
+        img_name_bas, file_ext = filename.rsplit(".", 1)[0], filename.rsplit(".", 1)[1]
+        filename = img_name_bas + "_scanned." + file_ext
+    else:
+        pass
+
+    return os.path.join(UPLOAD_FOLDER, filename)
+
+
+def standardize_date(date: str) -> str:
+    """Standardizes a date string to YYYY-MM-DD.
+
+    >>> standardize_date('31.12.2020')
+    '2020-12-31'
+    """
+    return dateutil.parser.parse(date, dayfirst=True, fuzzy=True).strftime("%Y-%m-%d")
 
 
 def response_code_to_text(code) -> Union[str, None]:
@@ -56,32 +92,6 @@ def write_to_json(filepath: str, data: dict) -> None:
     with open(filepath, "w") as f:
         json.dump(data, f)
         f.close()
-
-
-def format_image_path(img_path, option=None):
-    """Formats the image file name and changes the path to UPLOAD_FOLDER. Optionally, a
-    json path or an image path with added '_processed' can be returned.
-
-    >>> img_path_t = './data/IMG 1234.jpg'
-    >>> format_image_path(img_path_t)
-    './static/uploads/IMG_1234.jpg'
-    >>> format_image_path(img_path_t, option="json")
-    './static/uploads/IMG_1234.json'
-    >>> format_image_path(img_path_t, option="scanned")
-    './static/uploads/IMG_1234_scanned.jpg'
-    """
-    filename = os.path.split(img_path)[1]
-    filename = secure_filename(filename)
-
-    if option == "json":
-        filename = filename.rsplit(".", 1)[0] + ".json"
-    elif option == "scanned":
-        img_name_bas, file_ext = filename.rsplit(".", 1)[0], filename.rsplit(".", 1)[1]
-        filename = img_name_bas + "_scanned." + file_ext
-    else:
-        pass
-
-    return os.path.join(UPLOAD_FOLDER, filename)
 
 
 def load_file_into_gcs(
