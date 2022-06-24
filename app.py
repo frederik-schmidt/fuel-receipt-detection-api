@@ -61,7 +61,7 @@ def request_image_scan() -> Union[int, tuple]:
     if "file" not in request.files:
         return 422
     file = request.files["file"]
-    # If no file is selected, the browser submits an empty file without a filename
+    # if no file is selected, the browser submits an empty file without a filename
     if not file or file.filename == "":
         return 422
     if not allowed_file(file.filename):
@@ -88,7 +88,7 @@ def request_image_scan() -> Union[int, tuple]:
             gcs_base_uri = "https://storage.cloud.google.com/"
             gcs_uri = gcs_base_uri + GCS_BUCKET_NAME + "/" + remote_filename
 
-            os.remove(img_path)  # Remove local receipt from UPLOAD FOLDER
+            os.remove(img_path)  # remove local receipt from UPLOAD FOLDER
 
             return 200, scan_result, gcs_uri
         except requests.exceptions.ConnectionError:
@@ -134,7 +134,7 @@ def url_not_found(e):
 
 
 @app.errorhandler(405)
-def url_not_found(e):
+def method_not_allowed(e):
     """Creates custom response for requests with not allowed method."""
     response_code = 405
     response_text = response_code_to_text(response_code)
