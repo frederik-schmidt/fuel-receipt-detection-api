@@ -492,7 +492,7 @@ def scan_receipt_main(img_path: str, display_img: bool = False) -> dict:
     result, coordinates = {"id": img_name}, {}
 
     result_ind = extract_vendor(coordinates_all)
-    result["vendor"], _, coordinates["date"] = result_ind  # unpack result
+    result["vendor"], _, coordinates["vendor"] = result_ind  # unpack result
 
     result_ind = extract_date(text, coordinates_all, regex_patterns["date"])
     result["date"], _, coordinates["date"] = result_ind  # unpack result
