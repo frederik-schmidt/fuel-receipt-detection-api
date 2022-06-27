@@ -58,7 +58,7 @@ def standardize_date(date: str) -> str:
     return dateutil.parser.parse(date, dayfirst=True, fuzzy=True).strftime("%Y-%m-%d")
 
 
-def response_code_to_text(code) -> Union[str, None]:
+def response_code_to_text(response_code: int) -> Union[str, None]:
     """Converts the response code of an HTTP request to an appropriate description."""
     mapping = {
         400: "400 Bad Request",
@@ -68,7 +68,7 @@ def response_code_to_text(code) -> Union[str, None]:
         415: "415 Unsupported Media Type",
         422: "422 Unprocessable Entity",
     }
-    return mapping.get(code, None)
+    return mapping.get(response_code, None)
 
 
 def wrap_into_json(response_text: Union[str, dict]):
@@ -108,6 +108,7 @@ def load_file_into_gcs(
 def load_json_into_bq(json_data: dict, table_id: str = BQ_TABLE_ID) -> None:
     """Uploads a json to a Google BigQuery table."""
     table_schema = [
+        bigquery.SchemaField("timestamp", "STRING", "REQUIRED"),
         bigquery.SchemaField("id", "STRING", "REQUIRED"),
         bigquery.SchemaField("vendor", "STRING", "NULLABLE"),
         bigquery.SchemaField("date", "DATE", "NULLABLE"),
@@ -115,8 +116,8 @@ def load_json_into_bq(json_data: dict, table_id: str = BQ_TABLE_ID) -> None:
         bigquery.SchemaField("fuel_type", "STRING", "NULLABLE"),
         bigquery.SchemaField("tax_rate", "FLOAT", "NULLABLE"),
         bigquery.SchemaField("amount", "FLOAT", "NULLABLE"),
-        bigquery.SchemaField("price_per_unit", "FLOAT", "NULLABLE"),
-        bigquery.SchemaField("price_incl_tax", "FLOAT", "NULLABLE"),
+        bigquery.SchemaField("unit_price", "FLOAT", "NULLABLE"),
+        bigquery.SchemaField("price", "FLOAT", "NULLABLE"),
     ]
     credentials = service_account.Credentials.from_service_account_info(API_SECRET)
     client = bigquery.Client(project=GCP_PROJECT_ID, credentials=credentials)
