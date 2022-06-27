@@ -7,7 +7,7 @@ validated against a username and password. It uses a JSON format for output.
 We’ll walk through accessing the API, hitting the endpoint programmatically and using the
 web interface.
 
-## API Access <a name="access"></a>
+## API Access
 
 Accessing the Fuel Receipt Detection API requires simple authentication with a username
 and password.

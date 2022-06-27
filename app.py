@@ -73,14 +73,14 @@ def request_image_scan() -> Union[int, tuple]:
                 img_path = os.path.join(UPLOAD_FOLDER, request_id + ".jpg")
             else:
                 img_path = format_image_path(file.filename)
-            file.save(img_path)  # Save receipt locally to UPLOAD_FOLDER
+            file.save(img_path)  # save receipt locally to UPLOAD_FOLDER
 
-            scan_result = scan_receipt_main(img_path=img_path)  # Scan receipt
-            load_json_into_bq(scan_result)  # Load scan result into BQ
+            scan_result = scan_receipt_main(img_path=img_path)  # scan receipt
+            load_json_into_bq(scan_result)  # load scan result into BQ
 
             img_name = os.path.split(img_path)[1]
             remote_filename = f"{GCS_BUCKET_SUBFOLDER}/{img_name}"
-            load_file_into_gcs(  # Load scanned receipt into GCS
+            load_file_into_gcs(  # load scanned receipt into GCS
                 bucket_name=GCS_BUCKET_NAME,
                 local_filename=img_path,
                 remote_filename=remote_filename,
@@ -88,7 +88,7 @@ def request_image_scan() -> Union[int, tuple]:
             gcs_base_uri = "https://storage.cloud.google.com/"
             gcs_uri = gcs_base_uri + GCS_BUCKET_NAME + "/" + remote_filename
 
-            os.remove(img_path)  # remove local receipt from UPLOAD FOLDER
+            os.remove(img_path)  # remove local receipt from UPLOAD_FOLDER
 
             return 200, scan_result, gcs_uri
         except requests.exceptions.ConnectionError:
