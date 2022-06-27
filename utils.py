@@ -109,6 +109,7 @@ def load_json_into_bq(json_data: dict, table_id: str = BQ_TABLE_ID) -> None:
     """Uploads a json to a Google BigQuery table."""
     table_schema = [
         bigquery.SchemaField("id", "STRING", "REQUIRED"),
+        bigquery.SchemaField("vendor", "STRING", "NULLABLE"),
         bigquery.SchemaField("date", "DATE", "NULLABLE"),
         bigquery.SchemaField("time", "STRING", "NULLABLE"),
         bigquery.SchemaField("fuel_type", "STRING", "NULLABLE"),
