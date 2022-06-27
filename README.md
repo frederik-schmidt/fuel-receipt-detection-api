@@ -70,14 +70,16 @@ Code: `200`
 {
     "success": true,
     "data": {
-        "id": "eadacceef1f811ec8ebd5a66b67455ed",
-        "date": "2021-12-12",
-        "time": "18:01",
-        "fuel_type": "super",
-        "tax_rate": 0.19,
-        "amount": 30.32,
-        "price_per_unit": 1.649,
-        "price_incl_tax": 50.0
+      "timestamp": "2022-06-27T22:07:12:051591Z",
+      "id": "7e2a355af66511ec91a302c7a25866da",
+      "vendor": "FREIE TANKSTELLE Ferhat Ak Eschholzstr. 73 79106 FREIBURG",
+      "date": "2021-12-12",
+      "time": "18:01",
+      "fuel_type": "super",
+      "tax_rate": 0.19,
+      "amount": 30.32,
+      "unit_price": 1.649,
+      "price": 50.0
     }
 }
 ```
